@@ -1,0 +1,138 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Incluye padding y borde en el ancho/alto del elemento */
+}
+
+/* Variables de color */
+:root {
+    --color-principal: #008cff; /* Azul */
+    --color-fondo: #292727; /* Fondo oscuro */
+    --color-texto: #ffffff;
+    --color-tarjeta: rgb(33, 54, 66); /* Fondo de tarjetas */
+}
+
+/* Configuracion general del cuerpo */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+}
+
+/* Configuracion encabezado */
+.page-header {
+    background-color: var(--color-tarjeta);
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+/* Configuracion pie de página */
+.page-footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #333;
+    color: white;
+    margin-top: bottom; /* Considera usar un valor como 30px o auto para consistencia */
+}
+
+/* Configuracion visual de los items del grid*/
+section, article {
+    background-color: var(--color-tarjeta); 
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+/* Configuracion de las lineas separadoras*/
+h2 {
+    color: var(--color-principal);
+    margin-bottom: 15px;
+    border-bottom: 2px solid rgb(85, 37, 37);
+    padding-bottom: 5px;
+}
+
+/* Configuracion de la imagen*/
+.imagen {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%; /* Foto circular */
+    object-fit: cover;
+    margin-bottom: 15px;
+    border: 4px solid var(--color-principal);
+}
+
+/* 2.GRID*/
+.main-layout {
+    display: grid;
+    
+    /* Define la estructura de 2 columnas: 1/3 para la barra lateral, 2/3 para el contenido */
+    grid-template-columns: 1fr 2fr; 
+    
+    gap: 30px; 
+    
+    width: 90%;
+    max-width: 1200px;
+    margin: 30px auto; /* Centra el contenedor principal */
+}
+
+/* Posicionamiento de los Grid Items */
+
+/* El perfil va en la primera columna */
+.perfil {
+    grid-column: 1 / 2;
+    text-align: center;
+}
+
+/* Habilidades y Experiencia van en la segunda columna. */
+.habilidades {
+    grid-column: 2 / 3;
+}
+
+/* Experiencia también va en la primera columna, debajo del perfil */
+.experiencia {
+    grid-column: 1 / 2;
+}
+
+
+/* IMPORTANTE para hacer el diseño responsivo */
+@media (max-width: 768px) {
+    /* En pantallas pequeñas, usa una sola columna */
+    .main-layout {
+        grid-template-columns: 1fr; 
+        gap: 20px;
+    }
+    
+    /* Todos los elementos ocupan el ancho completo */
+    .perfil, .habilidades, .experiencia {
+        grid-column: 1 / -1; 
+    }
+}
+
+/* 3.FLEXBOX*/
+
+/* Contenedor de las listas con Flexbox */
+.lista-container {
+    display: flex;
+    
+    /* Permite el salto de línea para diseño responsivo */
+    flex-wrap: wrap; 
+    
+    /* Alinea los ítems al inicio del eje principal */
+    justify-content: flex-start; 
+    
+    gap: 15px; 
+}
+
+/* Configuracion de los items de las listas*/
+.lista-item {
+    background-color: rgb(85, 37, 37);
+    color: var(--color-texto);
+    padding: 20px 40px;
+    border-radius: 40px;
+    font-size: 1em;
+    font-weight: bold;
+}
