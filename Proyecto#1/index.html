@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Matrices n×n</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Calculadora de Matrices 🔢</h1>
+    </header>
+
+    <main>
+        <section id="controls">
+            <label for="matrix-size">Tamaño de la Matriz (n):</label>
+            <select id="matrix-size">
+                </select>
+            <button id="btn-generate-grids">Generar/Reiniciar Matrices</button>
+        </section>
+
+        <section id="matrix-inputs">
+            <div class="matrix-container">
+                <h2>Matriz A</h2>
+                <div id="grid-a" class="matrix-grid"></div>
+                <div class="matrix-actions">
+                    <button class="btn-action" data-target="a" data-action="random">Aleatoria</button>
+                    <button class="btn-action" data-target="a" data-action="example">Prueba</button>
+                </div>
+            </div>
+            <div class="matrix-container">
+                <h2>Matriz B</h2>
+                <div id="grid-b" class="matrix-grid"></div>
+                <div class="matrix-actions">
+                     <button class="btn-action" data-target="b" data-action="random">Aleatoria</button>
+                     <button class="btn-action" data-target="b" data-action="clear">Limpiar</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="operations">
+            <h3>Operaciones</h3>
+            <div class="op-group">
+                <button data-op="add">A + B</button>
+                <button data-op="subtract">A - B</button>
+                <button data-op="multiply">A × B</button>
+                <button data-op="identity">Identidad (I)</button>
+            </div>
+            <div class="op-group">
+                <label for="scalar-input">k:</label>
+                <input type="number" id="scalar-input" value="2" step="any">
+                <button data-op="multiply-scalar">k × A</button>
+            </div>
+            <div class="op-group">
+                <button data-op="transpose">Transpuesta (Aᵀ)</button>
+                <button data-op="determinant">Determinante (det(A))</button>
+                <button data-op="inverse">Inversa (A⁻¹)</button>
+            </div>
+        </section>
+
+        <section id="results">
+            <h2>Resultado</h2>
+            <div id="result-display">
+                <p>?</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
