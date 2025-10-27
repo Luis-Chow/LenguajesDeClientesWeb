@@ -71,6 +71,130 @@ document.addEventListener('DOMContentLoaded', () => {
         resultDisplay.innerHTML = `<p class="error">Error: ${message}</p>`;
     };
     
+    //FUNCIONES PURAS PARA OPERACIONES MATEMÁTICAS
+    
+    const matrixMath = {
+        //A + B
+        add: (A, B) => A.map((row, i) => row.map((val, j) => val + B[i][j])),
+        
+        //A - B
+        subtract: (A, B) => A.map((row, i) => row.map((val, j) => val - B[i][j])),
+
+        //A × B
+        multiply: (A, B) => {
+            const size = A.length;
+            const C = Array(size).fill(0).map(() => Array(size).fill(0));
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    for (let k = 0; k < size; k++) {
+                        C[i][j] += A[i][k] * B[k][j];
+                    }
+                }
+            }
+            return C;
+        },
+
+        //k × A
+        multiplyScalar: (k, A) => A.map(row => row.map(val => val * k)),
+
+        //A^t
+        transpose: (A) => A[0].map((_, colIndex) => A.map(row => row[colIndex])),
+
+        //In
+        identity: (n) => Array(n).fill(0).map((_, i) => Array(n).fill(0).map((__, j) => (i === j ? 1 : 0))),
+        
+        //det(A) usando expansión por cofactores (recursivo)
+        determinant: (A) => {
+            const n = A.length;
+            if (n === 2) return A[0][0] * A[1][1] - A[0][1] * A[1][0];
+            
+            let det = 0;
+            for (let j = 0; j < n; j++) {
+                const subMatrix = A.slice(1).map(row => row.filter((_, colIndex) => colIndex !== j));
+                det += ((-1) ** j) * A[0][j] * matrixMath.determinant(subMatrix);
+            }
+            return det;
+        },
+        
+        //A^-1 usando el método de la adjunta
+        inverse: (A) => {
+            const n = A.length;
+            const det = matrixMath.determinant(A);
+            if (Math.abs(det) < 1e-10) { // Validar que el determinante no sea cero
+                throw new Error("La matriz no es invertible (determinante es cero).");
+            }
+
+            //Calcular matriz de cofactores
+            const cofactors = Array(n).fill(0).map(() => Array(n).fill(0));
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    const subMatrix = A.filter((_, rowIndex) => i !== rowIndex)
+                                       .map(row => row.filter((_, colIndex) => j !== colIndex));
+                    cofactors[i][j] = ((-1) ** (i + j)) * matrixMath.determinant(subMatrix);
+                }
+            }
+
+            //Calcular adjunta (transpuesta de la de cofactores)
+            const adjugate = matrixMath.transpose(cofactors);
+
+            //Inversa = (1/det(A)) * Adj(A)
+            return matrixMath.multiplyScalar(1 / det, adjugate);
+        }
+    };
+
+    const handleOperation = (op) => {
+        try {
+            const A = readMatrixFromGrid(gridA, currentSize);
+            let B, k, result, title;
+
+            switch(op) {
+                case 'add':
+                    B = readMatrixFromGrid(gridB, currentSize);
+                    result = matrixMath.add(A, B);
+                    title = "Resultado de A + B";
+                    break;
+                case 'subtract':
+                    B = readMatrixFromGrid(gridB, currentSize);
+                    result = matrixMath.subtract(A, B);
+                    title = "Resultado de A - B";
+                    break;
+                case 'multiply':
+                    B = readMatrixFromGrid(gridB, currentSize);
+                    result = matrixMath.multiply(A, B);
+                    title = "Resultado de A × B";
+                    break;
+                case 'multiply-scalar':
+                    k = parseFloat(document.getElementById('scalar-input').value);
+                    if (isNaN(k)) throw new Error("El valor del escalar 'k' no es válido.");
+                    result = matrixMath.multiplyScalar(k, A);
+                    title = `Resultado de ${k} × A`;
+                    break;
+                case 'transpose':
+                    result = matrixMath.transpose(A);
+                    title = "Matriz Transpuesta Aᵀ";
+                    break;
+                case 'determinant':
+                    result = matrixMath.determinant(A);
+                    title = "Determinante de A";
+                    break;
+                case 'inverse':
+                    const A_inv = matrixMath.inverse(A);
+                    const verification = matrixMath.multiply(A, A_inv);
+                    displayResult(A_inv, "Matriz Inversa A⁻¹");
+                    //Añadir la verificación A × A^-1 = I
+                    displayResult(verification, "Verificación: A × A⁻¹ (debería ser la Identidad)");
+                    return; //Salir para evitar doble renderizado
+                case 'identity':
+                    result = matrixMath.identity(currentSize);
+                    title = `Matriz Identidad I${currentSize}`;
+                    break;
+            }
+            displayResult(result, title);
+        } catch (error) {
+            displayError(error.message);
+        }
+    };
+
     //Inicializacion
     const init = () => {
         for (let i = 2; i <= 10; i++) {
