@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     input.value = Math.floor(Math.random() * 21) - 10; // Enteros entre -10 y 10
                 } else if (action === 'clear') {
                     input.value = '';
-                } else if (action === 'example') {
+                } else if (action === 'simple') {
                     //Genera una matriz de ejemplo simple
                     input.value = Math.floor(Math.random() * 5) + 1;
                 }
