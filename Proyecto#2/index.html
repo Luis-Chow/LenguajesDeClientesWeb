@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+ 
     <div class="card-container">
 
         <div id="setup-view">
@@ -17,7 +17,7 @@
                 
                 <div class="form-group">
                     <label for="player-name">Nombre del Jugador:</label>
-                    <input type="text" id="player-name" name="player-name" class="form-control" required minlength="2" maxlength="20" placeholder="Ej: chinoSabio">
+                    <input type="text" id="player-name" name="player-name" class="form-control" required minlength="2" maxlength="20" placeholder="Ej: DevAsíncrono">
                 </div>
 
                 <div class="form-group">
@@ -45,6 +45,30 @@
                     ¡Comenzar Juego!
                 </button>
             </form>
+        </div>
+
+        <div id="loading-view">
+            <div class="loader"></div>
+            <p>Obteniendo preguntas...</p>
+        </div>
+
+        <div id="game-view">
+            <div class="game-hud">
+                <div id="game-progress">Pregunta 1 de 10</div>
+                <div id="game-score">Puntuación: 0</div>
+            </div>
+
+            <div class="timer-container">
+                <div id="timer-bar"></div>
+            </div>
+            <div id="timer-text">20</div>
+
+            <div class="question-container">
+                <h2 id="question-text">Cargando pregunta...</h2>
+            </div>
+
+            <div id="answer-options">
+            </div>
         </div>
 </body>
 </html>
