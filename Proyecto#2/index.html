@@ -10,6 +10,7 @@
  
     <div class="card-container">
 
+        <!--1. VISTA DE CONFIGURACION-->
         <div id="setup-view">
             <h1 class="view-title">Configuración de la Trivia</h1>
             <p id="setup-error"></p>
@@ -31,6 +32,7 @@
                         <option value="easy">Fácil</option>
                         <option value="medium" selected>Medio</option>
                         <option value="hard">Difícil</option>
+                         <!--Categorias de la API-->
                     </select>
                 </div>
 
@@ -47,11 +49,13 @@
             </form>
         </div>
 
+        <!--2.VISTA DE CARGA-->
         <div id="loading-view">
             <div class="loader"></div>
             <p>Obteniendo preguntas...</p>
         </div>
 
+        <!--3.VISTA DE JUEGO-->
         <div id="game-view">
             <div class="game-hud">
                 <div id="game-progress">Pregunta 1 de 10</div>
@@ -68,7 +72,45 @@
             </div>
 
             <div id="answer-options">
+                <!--Botones de respuesta-->
             </div>
         </div>
+
+        <!--4.VISTA DE RESULTADOS-->
+        <div id="results-view">
+            <h1 class="view-title">¡Juego Terminado!</h1>
+            <h2 id="results-player-name"></h2>
+
+            <div class="stats-container">
+                <div class="stat-row">
+                    <span class="stat-label">Puntuación Total:</span>
+                    <span id="results-score" class="stat-value"></span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Respuestas Correctas:</span>
+                    <span id="results-correct" class="stat-value"></span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Porcentaje de Aciertos:</span>
+                    <span id="results-accuracy" class="stat-value"></span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Tiempo Promedio por Pregunta:</span>
+                    <span id="results-avg-time" class="stat-value"></span>
+                </div>
+            </div>
+
+            <div class="results-buttons">
+                <button id="restart-same-btn" class="btn btn-primary">
+                    Jugar de Nuevo (Misma Config.)
+                </button>
+                <button id="restart-new-btn" class="btn btn-secondary">
+                    Nueva Configuración
+                </button>
+            </div>
+        </div>
+
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
