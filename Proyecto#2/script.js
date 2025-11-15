@@ -85,6 +85,38 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // ---2. CONFIGURACIÓN DEL JUEGO (SUBMIT DEL FORMULARIO)---
+    setupForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        // Validaciones
+        const name = playerNameInput.value.trim();
+        const amount = parseInt(questionAmountInput.value);
+
+        // Guardar configuración
+        gameSettings = {
+            playerName: name,
+            amount: amount,
+            difficulty: difficultySelect.value,
+            category: categorySelect.value,
+        };
+        
+        setupError.textContent = "";
+        startGame();
+    });
+
+    // ---3. INICIAR EL JUEGO---
+    function startGame() {
+        questions = [];
+        currentQuestionIndex = 0;
+        score = 0;
+        correctCount = 0;
+        incorrectCount = 0;
+        answerTimes = [];
+        
+        showView("loading");
+        fetchQuestions();
+    }
+
     // --- INICIAR LA APP ---
     fetchCategories(); // Cargar categorías al inicio
     showView("setup"); // Mostrar la vista de configuración
