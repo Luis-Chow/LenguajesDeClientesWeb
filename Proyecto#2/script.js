@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // --- REFERENCIAS A ELEMENTOS DEL DOM ---
+    // ---REFERENCIAS A ELEMENTOS DEL DOM---
     const views = {
         setup: document.getElementById("setup-view"),
         loading: document.getElementById("loading-view"),
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return txt.value;
     }
 
-    // --- 1. INICIALIZACION: CARGAR CATEGORÍAS ---
+    // ---1. INICIALIZACION: CARGAR CATEGORIAS---
     async function fetchCategories() {
         try {
             const response = await fetch("https://opentdb.com/api_category.php");
@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ---2. CONFIGURACIÓN DEL JUEGO (SUBMIT DEL FORMULARIO)---
+    // ---2. CONFIGURACION DEL JUEGO (SUBMIT DEL FORMULARIO)---
     setupForm.addEventListener("submit", (e) => {
         e.preventDefault();
         // Validaciones
@@ -117,7 +117,97 @@ document.addEventListener("DOMContentLoaded", () => {
         fetchQuestions();
     }
 
-    // --- INICIAR LA APP ---
-    fetchCategories(); // Cargar categorías al inicio
+    // ---4. OBTENER PREGUNTAS (ASÍNCRONO)---
+    async function fetchQuestions() {
+        let apiUrl = `https://opentdb.com/api.php?amount=${gameSettings.amount}&difficulty=${gameSettings.difficulty}&type=multiple`;
+        if (gameSettings.category !== "any") {
+            apiUrl += `&category=${gameSettings.category}`;
+        }
+
+        try {
+            const response = await fetch(apiUrl);
+            if (!response.ok) throw new Error("Error de red con la API.");
+            
+            const data = await response.json();
+            
+            if (data.response_code !== 0) {
+                throw new Error("No se encontraron preguntas para esta configuración. Prueba con 'Mixtas'.");
+            }
+
+            questions = data.results;
+            showView("game");
+            displayQuestion();
+
+        } catch (error) {
+            console.error("Error al obtener preguntas:", error);
+            showView("setup");
+            setupError.textContent = error.message;
+        }
+    }
+
+    // ---5. MOSTRAR PREGUNTA ACTUAL---
+    function displayQuestion() {
+        if (currentQuestionIndex >= questions.length) {
+            showResults();
+            return;
+        }
+
+        const question = questions[currentQuestionIndex];
+        
+        gameProgress.textContent = `Pregunta ${currentQuestionIndex + 1} de ${gameSettings.amount}`;
+        gameScore.textContent = `Puntuación: ${score}`;
+        questionText.textContent = decodeHTML(question.question);
+
+        const answers = [...question.incorrect_answers, question.correct_answer];
+        shuffleArray(answers);
+
+        answerOptions.innerHTML = "";
+
+        answers.forEach(answer => {
+            const button = document.createElement("button");
+            button.innerHTML = decodeHTML(answer);
+            button.className = "btn-answer";
+            
+            if (answer === question.correct_answer) {
+                button.dataset.correct = "true";
+            }
+            
+            button.addEventListener("click", handleAnswerClick);
+            answerOptions.appendChild(button);
+        });
+    }
+
+    // ---6.MANEJO DE RESPUESTA (CLICK)---
+    function handleAnswerClick(e) {
+        
+        const selectedButton = e.target;
+        const isCorrect = selectedButton.dataset.correct === "true";
+
+        Array.from(answerOptions.children).forEach(btn => {
+            btn.disabled = true;
+        });
+
+        // Feedback visual
+        if (isCorrect) {
+            score += 10;
+            correctCount++;
+            selectedButton.classList.add("correct");
+            gameScore.textContent = `Puntuación: ${score}`;
+        } else {
+            incorrectCount++;
+            selectedButton.classList.add("incorrect");
+            // Mostrar la correcta
+            const correctButton = answerOptions.querySelector('[data-correct="true"]');
+            if (correctButton) {
+                correctButton.classList.add("show-correct");
+            }
+        }
+
+        // Siguiente pregunta despues de un delay
+        setTimeout(nextQuestion, 1500); // 1.5 segundos de feedback
+    }
+
+    // ---INICIAR LA APP---
+    fetchCategories(); // Cargar categorias al inicio
     showView("setup"); // Mostrar la vista de configuración
 });
