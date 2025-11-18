@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let questionStartTime = 0;
     let answerTimes = [];
 
-    // ---NAVEGACION ENTRE VISTAS---
+    // ---NAVEGACION ENTRE VISTAS ---
     function showView(viewName) {
         Object.values(views).forEach(view => view.style.display = "none");
         if (views[viewName]) {
@@ -56,21 +56,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ---FUNCION DE UTILIDAD: DECODIFICAR TEXTO HTML (de la API)---
+    // ---DECODIFICAR TEXTO HTML---
     function decodeHTML(html) {
         const txt = document.createElement("textarea");
         txt.innerHTML = html;
         return txt.value;
     }
 
-    // ---1. INICIALIZACION: CARGAR CATEGORIAS---
+    // ---BARAJAR UN ARRAY---
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // ---1. INICIALIZACION: CARGAR CATEGORIAS ---
     async function fetchCategories() {
         try {
             const response = await fetch("https://opentdb.com/api_category.php");
             if (!response.ok) throw new Error("No se pudieron cargar las categorías.");
             const data = await response.json();
             
-            // Ordenamos categorias alfabéticamente
             data.trivia_categories.sort((a, b) => a.name.localeCompare(b.name));
 
             data.trivia_categories.forEach(category => {
@@ -85,14 +92,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ---2. CONFIGURACION DEL JUEGO (SUBMIT DEL FORMULARIO)---
+    // ---2. CONFIGURACION DEL JUEGO---
     setupForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        // Validaciones
+        //Validaciones
         const name = playerNameInput.value.trim();
         const amount = parseInt(questionAmountInput.value);
 
-        // Guardar configuración
+        if (name.length < 2 || name.length > 20) {
+            setupError.textContent = "El nombre debe tener entre 2 y 20 caracteres.";
+            return;
+        }
+        if (amount < 5 || amount > 20) {
+            setupError.textContent = "La cantidad de preguntas debe ser entre 5 y 20.";
+            return;
+        }
+
+        //Guardar configuracion
         gameSettings = {
             playerName: name,
             amount: amount,
@@ -117,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fetchQuestions();
     }
 
-    // ---4. OBTENER PREGUNTAS (ASÍNCRONO)---
+    // ---4. OBTENER PREGUNTAS---
     async function fetchQuestions() {
         let apiUrl = `https://opentdb.com/api.php?amount=${gameSettings.amount}&difficulty=${gameSettings.difficulty}&type=multiple`;
         if (gameSettings.category !== "any") {
@@ -154,15 +170,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const question = questions[currentQuestionIndex];
         
+        //Actualizar UI
         gameProgress.textContent = `Pregunta ${currentQuestionIndex + 1} de ${gameSettings.amount}`;
         gameScore.textContent = `Puntuación: ${score}`;
         questionText.textContent = decodeHTML(question.question);
 
+        //Preparar y barajar respuestas
         const answers = [...question.incorrect_answers, question.correct_answer];
         shuffleArray(answers);
 
+        //Limpiar opciones anteriores
         answerOptions.innerHTML = "";
 
+        //Crear botones de respuesta
         answers.forEach(answer => {
             const button = document.createElement("button");
             button.innerHTML = decodeHTML(answer);
@@ -175,19 +195,90 @@ document.addEventListener("DOMContentLoaded", () => {
             button.addEventListener("click", handleAnswerClick);
             answerOptions.appendChild(button);
         });
+
+        //Iniciar temporizador
+        questionStartTime = Date.now();
+        startTimer();
     }
 
-    // ---6.MANEJO DE RESPUESTA (CLICK)---
+    // ---6. MANEJO DEL TEMPORIZADOR (ASINCRONO)---
+    function startTimer() {
+        timeLeft = 20;
+        updateTimerDisplay();
+        
+        // Asegurarse de que la barra tenga el color correcto al inicio
+        timerBar.classList.add("timer-ok");
+        timerBar.classList.remove("timer-low");
+
+        clearInterval(timerInterval); // Limpiar cualquier temporizador anterior
+
+        //Usamos setInterval para actualizar el temporizador cada segundo
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+
+            //Advertencia visual
+            if (timeLeft <= 5 && timeLeft > 0) {
+                timerText.classList.add("timer-warning");
+            }
+
+            //Tiempo agotado
+            if (timeLeft <= 0) {
+                handleTimeout();
+            }
+        }, 1000);
+    }
+    
+    function stopTimer() {
+        clearInterval(timerInterval);
+        timerText.classList.remove("timer-warning");
+    }
+    
+    function updateTimerDisplay() {
+        timerText.textContent = timeLeft;
+        const percentage = (timeLeft / 20) * 100;
+        timerBar.style.width = `${percentage}%`;
+        
+        if (timeLeft <= 5) {
+            timerBar.classList.remove("timer-ok");
+            timerBar.classList.add("timer-low");
+        } else {
+            timerBar.classList.remove("timer-low");
+            timerBar.classList.add("timer-ok");
+        }
+    }
+
+    function handleTimeout() {
+        stopTimer();
+        incorrectCount++;
+        answerTimes.push(20);
+        
+        // Deshabilitar botones y mostrar la correcta
+        Array.from(answerOptions.children).forEach(btn => {
+            btn.disabled = true;
+            if (btn.dataset.correct) {
+                btn.classList.add("show-correct"); // Resaltar la correcta
+            }
+        });
+
+        setTimeout(nextQuestion, 2000); // 2 segundos de feedback
+    }
+
+    // ---7. MANEJO DE RESPUESTA (CLICK)---
     function handleAnswerClick(e) {
+        stopTimer();
         
         const selectedButton = e.target;
         const isCorrect = selectedButton.dataset.correct === "true";
+        const timeTaken = (Date.now() - questionStartTime) / 1000;
+        answerTimes.push(parseFloat(timeTaken.toFixed(2))); //Guardar tiempo
 
+        //Deshabilitar todos los botones
         Array.from(answerOptions.children).forEach(btn => {
             btn.disabled = true;
         });
 
-        // Feedback visual
+        //Feedback visual
         if (isCorrect) {
             score += 10;
             correctCount++;
@@ -203,11 +294,16 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // Siguiente pregunta despues de un delay
         setTimeout(nextQuestion, 1500); // 1.5 segundos de feedback
     }
 
+    // ---8. SIGUIENTE PREGUNTA---
+    function nextQuestion() {
+        currentQuestionIndex++;
+        displayQuestion(); // Esto llamará a showResults si se acaban las preguntas
+    }
+
     // ---INICIAR LA APP---
-    fetchCategories(); // Cargar categorias al inicio
+    fetchCategories(); // Cargar categorías al inicio
     showView("setup"); // Mostrar la vista de configuración
 });
