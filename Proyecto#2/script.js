@@ -303,6 +303,28 @@ document.addEventListener("DOMContentLoaded", () => {
         displayQuestion(); // Esto llamará a showResults si se acaban las preguntas
     }
 
+    // ---9. MOSTRAR RESULTADOS FINALES---
+    function showResults() {
+        stopTimer();
+        showView("results");
+
+        const totalQuestions = gameSettings.amount;
+        const accuracy = totalQuestions > 0 ? ((correctCount / totalQuestions) * 100).toFixed(0) : 0;
+        const avgTime = answerTimes.length > 0 
+            ? (answerTimes.reduce((a, b) => a + b, 0) / answerTimes.length).toFixed(1) 
+            : "N/A";
+
+        resultsPlayerName.textContent = `¡Felicidades, ${gameSettings.playerName}!`;
+        resultsScore.textContent = `${score} Puntos`;
+        resultsCorrect.textContent = `${correctCount} de ${totalQuestions}`;
+        resultsAccuracy.textContent = `${accuracy}%`;
+        resultsAvgTime.textContent = `${avgTime} seg.`;
+    }
+
+    // ---10. BOTONES DE REINICIO---
+    restartSameBtn.addEventListener("click", startGame);
+    restartNewBtn.addEventListener("click", () => showView("setup"));
+
     // ---INICIAR LA APP---
     fetchCategories(); // Cargar categorías al inicio
     showView("setup"); // Mostrar la vista de configuración
